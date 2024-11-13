@@ -35,17 +35,21 @@ def most_busy_users(df):
         columns={'index': 'name', 'user': 'percent'})
     return x,df
 
-def create_wordcloud(selected_user,df):
+def create_wordcloud(selected_user, df):
 
+    # Read the stop words from a file
     f = open('stop_hinglish.txt', 'r')
     stop_words = f.read()
 
+    # Filter the DataFrame based on the selected user
     if selected_user != 'Overall':
         df = df[df['user'] == selected_user]
 
+    # Remove group notifications and media omitted messages
     temp = df[df['user'] != 'group_notification']
     temp = temp[temp['message'] != '<Media omitted>\n']
 
+    # Function to remove stop words
     def remove_stop_words(message):
         y = []
         for word in message.lower().split():
@@ -53,10 +57,21 @@ def create_wordcloud(selected_user,df):
                 y.append(word)
         return " ".join(y)
 
-    wc = WordCloud(width=500,height=500,min_font_size=10,background_color='white')
+    # Apply stop word removal
     temp['message'] = temp['message'].apply(remove_stop_words)
-    df_wc = wc.generate(temp['message'].str.cat(sep=" "))
-    return df_wc
+
+    # Concatenate all messages into one string
+    text = temp['message'].astype(str).str.cat(sep=" ")
+
+    # Ensure there is at least one valid word
+    if text.strip():  # Check if there is any non-empty string
+        wc = WordCloud(width=500, height=500, min_font_size=10, background_color='white').generate(text)
+        return wc
+    else:
+        return None  # Return None if there are no valid messages
+
+        return None  # Return None if there are no valid messages
+
 
 def most_common_words(selected_user,df):
 
