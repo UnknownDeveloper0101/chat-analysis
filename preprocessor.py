@@ -11,6 +11,9 @@ def preprocess(data):
     # convert message_date type
     df['message_date'] = pd.to_datetime(df['message_date'], format='%d/%m/%y, %H:%M - ')
 
+    # Convert to 12-hour time format with AM/PM
+    df['message_date'] = df['message_date'].dt.strftime('%d/%m/%y, %I:%M %p')  # 12-hour format (AM/PM)
+
     df.rename(columns={'message_date': 'date'}, inplace=True)
 
     users = []
@@ -29,14 +32,14 @@ def preprocess(data):
     df['message'] = messages
     df.drop(columns=['user_message'], inplace=True)
 
-    df['only_date'] = df['date'].dt.date
-    df['year'] = df['date'].dt.year
-    df['month_num'] = df['date'].dt.month
-    df['month'] = df['date'].dt.month_name()
-    df['day'] = df['date'].dt.day
-    df['day_name'] = df['date'].dt.day_name()
-    df['hour'] = df['date'].dt.hour
-    df['minute'] = df['date'].dt.minute
+    df['only_date'] = df['date'].apply(lambda x: x.split(",")[0])  # Only date part
+    df['year'] = pd.to_datetime(df['only_date'], format='%d/%m/%y').dt.year
+    df['month_num'] = pd.to_datetime(df['only_date'], format='%d/%m/%y').dt.month
+    df['month'] = pd.to_datetime(df['only_date'], format='%d/%m/%y').dt.month_name()
+    df['day'] = pd.to_datetime(df['only_date'], format='%d/%m/%y').dt.day
+    df['day_name'] = pd.to_datetime(df['only_date'], format='%d/%m/%y').dt.day_name()
+    df['hour'] = pd.to_datetime(df['date'], format='%d/%m/%y, %I:%M %p').dt.hour  # Get the hour from 12-hour format
+    df['minute'] = pd.to_datetime(df['date'], format='%d/%m/%y, %I:%M %p').dt.minute
 
     period = []
     for hour in df[['day_name', 'hour']]['hour']:
