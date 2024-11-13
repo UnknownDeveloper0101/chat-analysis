@@ -12,7 +12,8 @@ if uploaded_file is not None:
     df = preprocessor.preprocess(data)
     
     # fetch unique users
-    user_list = df['user'].unique().tolist()
+    # Safely remove 'group_notification' if it exists
+if 'group_notification' in user_list:
     user_list.remove('group_notification')
     user_list.sort()
     user_list.insert(0,"Overall")
